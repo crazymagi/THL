@@ -127,11 +127,27 @@ namespace THL.WebApi.Tests
             statusResult.Should().NotBeNull();
             statusResult?.StatusCode.Should().Be(400);
         }
+        
+        [Test, AutoData]
+        public async Task Delete_ReturnNotFound_WhenProductNotExist(Guid id)
+        {
+            // Arrange
+            _productServiceMock.Setup(x => x.GetProductById(id)).ReturnsAsync((Product)null).Verifiable();
+            
+            // Act
+            var result = await _subject.DeleteAsync(id);
+            
+            // Assert
+            var statusResult = result.Result as StatusCodeResult;
+            statusResult.Should().NotBeNull();
+            statusResult?.StatusCode.Should().Be(404);
+        }
 
         [Test, AutoData]
         public async Task Delete_ReturnOK_WhenDeleteSuccess(Guid id)
         {
             // Arrange
+            _productServiceMock.Setup(x => x.GetProductById(id)).ReturnsAsync(_fixture.Create<Product>()).Verifiable();
             _productServiceMock.Setup(x => x.DeleteProduct(id)).Returns(Task.CompletedTask).Verifiable();
             
             // Act

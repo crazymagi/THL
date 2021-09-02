@@ -46,12 +46,14 @@ namespace THL.WebApi.Controllers
         {
             if (id == Guid.Empty)
             {
+                _logger.LogWarning("The request cannot be processed because of invalid Id");
                 return BadRequest();
             }
 
             var product = await _productService.GetProductById(id);
             if (product == null)
             {
+                _logger.LogWarning("The request cannot be processed because the product of {Id} do not exist", id);
                 return NotFound();
             }
 
@@ -66,11 +68,13 @@ namespace THL.WebApi.Controllers
         {
             if (string.IsNullOrWhiteSpace(dto.Name))
             {
+                _logger.LogWarning("The request cannot be processed because of the invalid name");
                 return BadRequest();
             }
 
             if (dto.Price <= 0)
             {
+                _logger.LogWarning("The request cannot be processed because of the invalid price");
                 return BadRequest();
             }
 
@@ -90,16 +94,19 @@ namespace THL.WebApi.Controllers
         {
             if (id == Guid.Empty)
             {
+                _logger.LogWarning("The request cannot be processed because of the invalid id");
                 return BadRequest();
             }
 
             if (string.IsNullOrWhiteSpace(dto.Name))
             {
+                _logger.LogWarning("The request cannot be processed because of the invalid name");
                 return BadRequest();
             }
 
             if (dto.Price <= 0)
             {
+                _logger.LogWarning("The request cannot be processed because of the invalid price");
                 return BadRequest();
             }
 
@@ -107,6 +114,7 @@ namespace THL.WebApi.Controllers
 
             if (product == null)
             {
+                _logger.LogWarning("The request cannot be processed because of the product ({Id}) does not exist", id);
                 return NotFound();
             }
 
@@ -124,12 +132,21 @@ namespace THL.WebApi.Controllers
         [HttpDelete]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Route("{id}")]
         public async Task<ActionResult<ProductDto>> DeleteAsync([FromRoute] Guid id)
         {
             if (id == Guid.Empty)
             {
+                _logger.LogWarning("The request cannot be processed because of the invalid id");
                 return BadRequest();
+            }
+
+            var product = await _productService.GetProductById(id);
+            if (product == null)
+            {
+                _logger.LogWarning("The request cannot be processed because of the product ({Id}) does not exist", id);
+                return NotFound();
             }
 
             await _productService.DeleteProduct(id);
