@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace THL.WebApi.Dto
+namespace THL.WebApi.Dtos
 {
     public class ProductDto
     {
