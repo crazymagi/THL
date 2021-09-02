@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using THL.Bll.Services;
+using THL.Domain;
 using THL.WebApi.Dtos;
 
 namespace THL.WebApi.Controllers
@@ -61,9 +62,23 @@ namespace THL.WebApi.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ProductDto>> CreateAsync([FromBody] ProductDto dto)
+        public async Task<ActionResult<ProductDto>> CreateAsync([FromBody] ProductInfoDto dto)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                return BadRequest();
+            }
+
+            if (dto.Price <= 0)
+            {
+                return BadRequest();
+            }
+
+            var rawProduct = _mapper.Map<Product>(dto);
+            var product = await _productService.CreateProduct(rawProduct);
+
+            var result = _mapper.Map<ProductDto>(product);
+            return result;
         }
         
         [HttpPut]
@@ -71,18 +86,54 @@ namespace THL.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Route("{id}")]
-        public async Task<ActionResult<ProductDto>> UpdateAsync([FromRoute] Guid id, [FromBody] ProductDto dto)
+        public async Task<ActionResult<ProductDto>> UpdateAsync([FromRoute] Guid id, [FromBody] ProductInfoDto dto)
         {
-            throw new NotImplementedException();
+            if (id == Guid.Empty)
+            {
+                return BadRequest();
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                return BadRequest();
+            }
+
+            if (dto.Price <= 0)
+            {
+                return BadRequest();
+            }
+
+            var product = await _productService.GetProductById(id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            product.Name = dto.Name;
+            product.Description = dto.Description;
+            product.Price = dto.Price;
+
+            await _productService.UpdateProduct(product);
+
+            var result = _mapper.Map<ProductDto>(product);
+
+            return result;
         }
         
         [HttpDelete]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Route("{id}")]
         public async Task<ActionResult<ProductDto>> DeleteAsync([FromRoute] Guid id)
         {
-            throw new NotImplementedException();
+            if (id == Guid.Empty)
+            {
+                return BadRequest();
+            }
+
+            await _productService.DeleteProduct(id);
+            return Ok();
         }
     }
 }

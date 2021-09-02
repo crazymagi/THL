@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 using THL.Domain;
 
 namespace THL.WebApi.Dtos
@@ -8,6 +9,7 @@ namespace THL.WebApi.Dtos
         public MapperProfile()
         {
             CreateMap<Product, ProductDto>();
+            CreateMap<ProductInfoDto, Product>();
         }
     }
 }
