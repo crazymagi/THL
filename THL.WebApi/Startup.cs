@@ -1,10 +1,15 @@
+using System;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using THL.Bll.Services;
+using THL.DataAccess;
+using THL.Domain;
 using THL.WebApi.Dtos;
 
 namespace THL.WebApi
@@ -23,6 +28,7 @@ namespace THL.WebApi
         {
             services.AddScoped<IProductService, ProductService>();
             services.AddAutoMapper(typeof(MapperProfile));
+            services.AddDbContext<IThlDbContext, ThlDbContext>(o => o.UseInMemoryDatabase("ThlDatabase"));
             services.AddControllers();
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "THL.WebApi", Version = "v1"}); });
         }
@@ -36,12 +42,15 @@ namespace THL.WebApi
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "THL.WebApi v1"));
             }
+            
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
             app.UseAuthorization();
+            
+            // Seed(app);
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
