@@ -31,6 +31,10 @@ namespace THL.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetAsync([FromQuery] string searchTerm, [FromQuery] int page = 0, [FromQuery] int pageSize = 10)
         {
+            if (page < 0 || pageSize <= 0)
+            {
+                return BadRequest();
+            }
             var products = await _productService.GetProducts(searchTerm, page, pageSize);
             var result = _mapper.Map<List<ProductDto>>(products);
 
@@ -42,7 +46,7 @@ namespace THL.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ProductDto>> GetByIdAsync([FromQuery] Guid id)
+        public async Task<ActionResult<ProductDto>> GetByIdAsync([FromRoute] Guid id)
         {
             if (id == Guid.Empty)
             {

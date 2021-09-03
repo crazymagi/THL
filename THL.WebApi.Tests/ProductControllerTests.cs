@@ -44,6 +44,23 @@ namespace THL.WebApi.Tests
             _loggerMock.VerifyAll();
         }
 
+        [TestCase(1, 0)]
+        [TestCase(-1, 1)]
+        [TestCase(1, -1)]
+        public async Task GetAsync_ReturnBadRequest_WhenPageOrPageSizeAreInvalid(int page, int pageSize)
+        {
+            // Arrange
+            var searchTerm = _fixture.Create<string>();
+
+            // Act
+            var result = await _subject.GetAsync(searchTerm, page, pageSize);
+            
+            // Assert
+            var statusResult = result.Result as StatusCodeResult;
+            statusResult.Should().NotBeNull();
+            statusResult?.StatusCode.Should().Be(400);
+        }
+
         [Test, AutoData]
         public async Task GetAsync_ReturnExpected(string searchTerm, int page, int pageSize)
         {
